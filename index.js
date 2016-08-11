@@ -8,7 +8,8 @@ const querystring = require('querystring');
 const co = require('co');
 
 const Templates = {
-	CAMPAIGN: require('./templates/campaign')
+	CAMPAIGN: require('./templates/campaign'),
+	CHALLENGE: require('./templates/challenge')
 };
 
 const file = new Static.Server('./public');
@@ -39,7 +40,24 @@ co(function*() {
 
 			let id = yield model.create(params);
 
-			return finalizer.end(200, `Share this link: ${request.headers.host}/campaigns/${id}`);
+			let link = `${request.headers.host}/campaigns/${id}`;
+			return finalizer.end(200, `Share this link: <a href="//${link}">${link}</a>`, { "Content-Type": "text/html" });
+		})),
+
+		route.post('/accept', request => co(function*() {
+			let body = yield readBody(request);
+			let params = querystring.parse(body);
+
+			if (!params.id) { return finalizer.end(422, 'Parameter "id" required'); }
+			if (!params.name) { return finalizer.end(422, 'Parameter "name" required'); }
+
+			let ok = yield model.accept(params);
+			if (!ok) {
+				return finalizer.end(200, `Sorry, this challenge has already been accepted`);
+			}
+
+			let link = `${request.headers.host}/campaigns/${params.id}`;
+			return finalizer.end(200, `Share this link: <a href="//${link}">${link}</a>`, { "Content-Type": "text/html" });
 		})),
 
 		route.regex(/^\/campaigns/, request => co(function*() {
@@ -49,7 +67,10 @@ co(function*() {
 
 			let id = res[1];
 			let entry = yield model.get(id);
-			return finalizer.end(200, Templates.CAMPAIGN(entry));
+
+			let result = entry.second ? Templates.CAMPAIGN(entry) : Templates.CHALLENGE(id, entry)
+
+			return finalizer.end(200, result);
 		})),
 
 		route.get('/', request => finalizer.redirect('/index.html')),
