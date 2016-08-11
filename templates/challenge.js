@@ -23,7 +23,7 @@ module.exports = function(id, entry) {
 		</div>
 
 		<a href="/" class="btn btn-default" role="button">Cancel</a>
-		<button type="submit" class="btn btn-default">Create</button>
+		<button type="submit" class="btn btn-default">Accept</button>
 	</form>
 </body>
 	`;
