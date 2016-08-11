@@ -11,12 +11,11 @@ module.exports = (dbPath) => co(function*() {
 	mkdirp.sync(dbPath);
 
 	return {
-		create: (name, estimate) => co(function*() {
-			assert(name, 'Parameter "name" is required!');
-			estimate = estimate || 0;
+		create: (params) => co(function*() {
+			assert(params.name, 'Parameter "name" is required!');
 
 			let id = guid.raw();
-			yield fs.writeFile.bind(fs, path.join(dbPath, id), `${name}_${estimate}`);
+			yield fs.writeFile.bind(fs, path.join(dbPath, id), JSON.stringify(params));
 			return id;
 		}),
 		get: id => co(function*() {
@@ -24,13 +23,8 @@ module.exports = (dbPath) => co(function*() {
 
 			let content = yield fs.readFile.bind(fs, path.join(dbPath, id), 'utf8');
 			let lines = content.split('\n');
-			let [name, estimate] = lines[0].split('_');
 
-			return {
-				name: name,
-				estimate: estimate,
-				votes: lines.length - 1
-			};
+			return Object.assign(JSON.parse(lines[0]), { votes: lines.length - 1 });
 		})
 	};
 });

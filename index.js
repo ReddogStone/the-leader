@@ -7,6 +7,10 @@ const url = require('url');
 const querystring = require('querystring');
 const co = require('co');
 
+const Templates = {
+	CAMPAIGN: require('./templates/campaign')
+};
+
 const file = new Static.Server('./public');
 
 const hostname = '127.0.0.1';
@@ -33,9 +37,9 @@ co(function*() {
 
 			if (!params.name) { return finalizer.end(422, 'Parameter "name" required'); }
 
-			let id = yield model.create(params.name, params.estimate);
+			let id = yield model.create(params);
 
-			return finalizer.end(200, `Share this link: ${request.socket.remoteAddress}:${request.socket.localPort}/campaigns/${id}`);
+			return finalizer.end(200, `Share this link: ${request.headers.host}/campaigns/${id}`);
 		})),
 
 		route.regex(/^\/campaigns/, request => co(function*() {
@@ -45,7 +49,7 @@ co(function*() {
 
 			let id = res[1];
 			let entry = yield model.get(id);
-			return finalizer.end(200, JSON.stringify(entry, 0, 4));
+			return finalizer.end(200, Templates.CAMPAIGN(entry));
 		})),
 
 		route.get('/', request => finalizer.redirect('/index.html')),
@@ -53,7 +57,7 @@ co(function*() {
 		route.get('/create.html', request => response => file.serve(request, response)),
 
 		route.regex(/css$/, request => response => file.serve(request, response))
-	])).listen(port, hostname, () => console.log(`Server started: ${hostname}:${port}`));
+	])).listen(port, () => console.log(`Server started: ${hostname}:${port}`));
 }).catch(function(error) {
 	console.error('Top level:', error.stack);
 });

@@ -1,6 +1,9 @@
+body {
+	margin: 2%;
+}
+
 form {
-	width: 40em;
-	margin: 1em;
+	width: 50%;
 }
 
 label.input::after {
