@@ -7,7 +7,11 @@
   "author": "Elshad Shirinov",
   "license": "UNLICENSED",
   "dependencies": {
-    "yokto": "",
-    "node-static": ""
+    "mkdirp": "^0.5.1",
+    "node-static": "",
+    "yokto": ""
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.0"
   }
 }
