@@ -7,6 +7,8 @@
   "author": "Elshad Shirinov",
   "license": "UNLICENSED",
   "dependencies": {
+    "co": "^4.6.0",
+    "guid": "0.0.12",
     "mkdirp": "^0.5.1",
     "node-static": "",
     "yokto": ""
