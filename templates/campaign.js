@@ -1,17 +1,27 @@
 const head = require('./head');
 
-module.exports = function(entry) {
+module.exports = function(id, entry) {
 	return `
 ${head}
 
 <body>
 <h2>Campaign</h2>
-<h3>${entry.first.name}: ${entry.first.slogan}</h3> vs
-<h3>${entry.second.name}: ${entry.second.slogan}</h3>
+<h3>${entry.first.name}: ${entry.first.slogan} - ${entry.first.votes} votes</h3> <br/>
+vs
+<h3>${entry.second.name}: ${entry.second.slogan} - ${entry.second.votes} votes</h3>
 
-<h3>Votes</h3>
-${entry.first.name}: ${entry.first.votes}
-${entry.second.name}: ${entry.second.votes}
+<form role="form" action="/vote" id="campaign" method="post">
+	<input type="hidden" name="id" value="${id}">
+	<input type="hidden" name="option" value="0">
+	<button type="submit" class="btn btn-default">Vote ${entry.first.name}</button>
+</form>
+
+<form role="form" action="/vote" id="campaign" method="post">
+	<input type="hidden" name="id" value="${id}">
+	<input type="hidden" name="option" value="1">
+	<button type="submit" class="btn btn-default">Vote ${entry.second.name}</button>
+</form>
+
 </body>
 	`;
 };

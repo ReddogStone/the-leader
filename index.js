@@ -61,6 +61,20 @@ co(function*() {
 			return finalizer.end(200, link, { "Content-Type": "text/html" });
 		})),
 
+		route.post('/vote', request => co(function*() {
+			let body = yield readBody(request);
+			let params = querystring.parse(body);
+
+			if (!params.id) { return finalizer.end(422, 'Parameter "id" required'); }
+
+			let ok = yield model.vote(params.id, Number.parseInt(params.option), request.socket.remoteAddress);
+			if (!ok) {
+				return finalizer.end(200, `Sorry, you have already voted`);
+			}
+
+			return finalizer.redirect(`/campaigns/${params.id}`);
+		})),
+
 		route.regex(/^\/campaigns/, request => co(function*() {
 			let pathname = url.parse(request.url).pathname;
 			let res = /^\/campaigns\/([\w-]+)/.exec(pathname);
@@ -69,7 +83,7 @@ co(function*() {
 			let id = res[1];
 			let entry = yield model.get(id);
 
-			let result = entry.second ? Templates.CAMPAIGN(entry) : Templates.CHALLENGE(id, entry)
+			let result = (entry.second ? Templates.CAMPAIGN : Templates.CHALLENGE)(id, entry)
 
 			return finalizer.end(200, result, { "Content-Type": "text/html" });
 		})),
