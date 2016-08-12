@@ -9,7 +9,8 @@ const co = require('co');
 
 const Templates = {
 	CAMPAIGN: require('./templates/campaign'),
-	CHALLENGE: require('./templates/challenge')
+	CHALLENGE: require('./templates/challenge'),
+	LINK: require('./templates/link')
 };
 
 const file = new Static.Server('./public');
@@ -40,8 +41,8 @@ co(function*() {
 
 			let id = yield model.create(params);
 
-			let link = `${request.headers.host}/campaigns/${id}`;
-			return finalizer.end(200, `Share this link: <a href="//${link}">${link}</a>`, { "Content-Type": "text/html" });
+			let link = Templates.LINK(`${request.headers.host}/campaigns/${id}`);
+			return finalizer.end(200, link, { "Content-Type": "text/html" });
 		})),
 
 		route.post('/accept', request => co(function*() {
@@ -56,8 +57,8 @@ co(function*() {
 				return finalizer.end(200, `Sorry, this challenge has already been accepted`);
 			}
 
-			let link = `${request.headers.host}/campaigns/${params.id}`;
-			return finalizer.end(200, `Share this link: <a href="//${link}">${link}</a>`, { "Content-Type": "text/html" });
+			let link = Templates.LINK(`${request.headers.host}/campaigns/${params.id}`);
+			return finalizer.end(200, link, { "Content-Type": "text/html" });
 		})),
 
 		route.regex(/^\/campaigns/, request => co(function*() {
@@ -70,7 +71,7 @@ co(function*() {
 
 			let result = entry.second ? Templates.CAMPAIGN(entry) : Templates.CHALLENGE(id, entry)
 
-			return finalizer.end(200, result);
+			return finalizer.end(200, result, { "Content-Type": "text/html" });
 		})),
 
 		route.get('/', request => finalizer.redirect('/index.html')),
