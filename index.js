@@ -36,7 +36,7 @@ co(function*() {
 		route.post('/create', request => co(function*() {
 			let body = yield readBody(request);
 			let params = querystring.parse(body);
-
+			
 			if (!params.name) { return finalizer.end(422, 'Parameter "name" required'); }
 
 			let id = yield model.create(params);

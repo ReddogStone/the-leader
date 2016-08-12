@@ -5,7 +5,7 @@ module.exports = function(id, entry) {
 ${head}
 
 <body>
-	<form role="form" action="/accept" id="campaign" method="post">
+	<form role="form" action="/accept" id="campaign" method="post" accept-charset="UTF-8">
 		<label class="h2" form="campaign">Accept challenge from ${entry.first.name}: ${entry.first.slogan}</label>
 
 		<input type="hidden" name="id" value="${id}">
