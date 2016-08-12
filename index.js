@@ -15,8 +15,7 @@ const Templates = {
 
 const file = new Static.Server('./public');
 
-const hostname = '127.0.0.1';
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 function readBody(request) {
 	let body = [];
@@ -36,7 +35,7 @@ co(function*() {
 		route.post('/create', request => co(function*() {
 			let body = yield readBody(request);
 			let params = querystring.parse(body);
-			
+
 			if (!params.name) { return finalizer.end(422, 'Parameter "name" required'); }
 
 			let id = yield model.create(params);
@@ -93,7 +92,7 @@ co(function*() {
 		route.get('/create.html', request => response => file.serve(request, response)),
 
 		route.regex(/css$/, request => response => file.serve(request, response))
-	])).listen(port, () => console.log(`Server started: ${hostname}:${port}`));
+	])).listen(port, () => console.log(`Server started on port ${port}`));
 }).catch(function(error) {
 	console.error('Top level:', error.stack);
 });
