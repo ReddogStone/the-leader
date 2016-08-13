@@ -21,11 +21,25 @@ module.exports = (dbPath) => co(function*() {
 	mkdirp.sync(dbPath);
 
 	return {
+		clear: () => co(function*() {
+			let names = yield fs.readdir.bind(fs, dbPath);
+			for (let name of names) {
+				yield fs.unlink.bind(fs, path.join(dbPath, name));
+			}
+		}),
 		create: params => co(function*() {
 			assert(params.name, 'Parameter "name" is required!');
 
 			let id = guid.raw();
-			yield fs.writeFile.bind(fs, path.join(dbPath, id), JSON.stringify(params));
+			let campaign = {
+				name: params.campaignName,
+				description: params.campaignDescription
+			};
+			let creator = {
+				name: params.name,
+				slogan: params.slogan
+			};
+			yield fs.writeFile.bind(fs, path.join(dbPath, id), JSON.stringify(campaign) + '\n' + JSON.stringify(creator));
 			return id;
 		}),
 		accept: params => co(function*() {
@@ -36,7 +50,7 @@ module.exports = (dbPath) => co(function*() {
 			delete params.id;
 
 			let content = yield fs.readFile.bind(fs, path.join(dbPath, id), 'utf8');
-			if (content.split('\n').length > 1) { return false; }
+			if (content.split('\n').length > 2) { return false; }
 
 			yield fs.appendFile.bind(fs, path.join(dbPath, id), '\n' + JSON.stringify(params));
 			return true;
@@ -47,10 +61,12 @@ module.exports = (dbPath) => co(function*() {
 			let content = yield fs.readFile.bind(fs, path.join(dbPath, id), 'utf8');
 			let lines = content.split('\n');
 
+			let campaign = JSON.parse(lines[0]);
+
 			let first = 0;
 			let second = 0;
-			if (lines.length > 2) {
-				let votes = getVotes(lines.slice(2));
+			if (lines.length > 3) {
+				let votes = getVotes(lines.slice(3));
 				for (let vote of votes) {
 					if (vote.option === 0) { first++ };
 				}
@@ -58,8 +74,9 @@ module.exports = (dbPath) => co(function*() {
 			}
 
 			return {
-				first: Object.assign(JSON.parse(lines[0]), { votes: first }),
-				second: lines.length > 1 ? Object.assign(JSON.parse(lines[1]), { votes: second }) : null
+				campaign: campaign,
+				first: Object.assign(JSON.parse(lines[1]), { votes: first }),
+				second: lines.length > 2 ? Object.assign(JSON.parse(lines[2]), { votes: second }) : null
 			};
 		}),
 		vote: (id, option, ip) => co(function*() {
@@ -68,7 +85,7 @@ module.exports = (dbPath) => co(function*() {
 			let content = yield fs.readFile.bind(fs, path.join(dbPath, id), 'utf8');
 			let lines = content.split('\n');
 
-			let votes = getVotes(lines.slice(2));
+			let votes = getVotes(lines.slice(3));
 
 			for (let vote of votes) {
 				if (vote.ip === ip) {

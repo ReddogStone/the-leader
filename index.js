@@ -32,10 +32,16 @@ co(function*() {
 	const model = yield require('./src/model')('db');
 
 	http.createServer(stack([
+		route.get('/clear', request => co(function*() {
+			yield model.clear();
+			return finalizer.end(200, 'OK');
+		})),
+
 		route.post('/create', request => co(function*() {
 			let body = yield readBody(request);
 			let params = querystring.parse(body);
 
+			if (!params.campaignName) { return finalizer.end(422, 'Parameter "campaignName" required'); }
 			if (!params.name) { return finalizer.end(422, 'Parameter "name" required'); }
 
 			let id = yield model.create(params);

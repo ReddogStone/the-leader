@@ -5,7 +5,7 @@ module.exports = function(id, entry) {
 ${head}
 
 <body>
-<h2>Campaign</h2>
+<h2>Campaign ${entry.campaign.name}: ${entry.campaign.description}</h2>
 <h3>${entry.first.name}: ${entry.first.slogan} - ${entry.first.votes} votes</h3> <br/>
 vs
 <h3>${entry.second.name}: ${entry.second.slogan} - ${entry.second.votes} votes</h3>
